@@ -5,6 +5,7 @@ int main(void)
 {
     // Initialize the window with a temporary size
     InitWindow(800, 800, "dsa-queue-simulator");
+    SetTargetFPS(60);
 
     Texture2D background = LoadTexture("Images/img.png");
     if (background.id == 0) {
@@ -16,7 +17,7 @@ int main(void)
     }
     
     // Switch to fullscreen
-    ToggleFullscreen();
+    //ToggleFullscreen();
 
     while (!WindowShouldClose()) // Main loop
     {
