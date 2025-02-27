@@ -40,7 +40,7 @@ void simulateTraffic() {
         DrawText("Traffic Simulation", 10, 10, 20, WHITE);
 
         // Create a vehicle every 60 frames
-        if (frameCounter % 60 == 0) {
+        if (frameCounter % 20 == 0) {
             createVehicle();
         }
 
