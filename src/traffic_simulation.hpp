@@ -2,22 +2,31 @@
 #define TRAFFIC_SIMULATION_HPP
 
 #include <raylib.h>
-#include <stdbool.h>
 #include <vector>
 
-#define MAX_VEHICLES 10
-
-typedef struct Vehicle {
-    bool active;
+// Vehicle structure definition
+struct Vehicle {
     Rectangle rect;
-    int speed;
-    Color color;  // Added color to the Vehicle struct
-} Vehicle;
+    Color color;
+    bool active;
+    float speed;
+};
 
-extern std::vector<Vehicle> vehicles;
+// Traffic light structure definition
+struct TrafficLight {
+    bool isGreen;      // true = green, false = red
+    float timer;       // Timer for switching
+    float switchTime;  // Time interval for switching light
+};
 
+// Function declarations
 void createVehicle();
 void updateVehicles();
 Color getRandomColor();
+void updateTrafficLight();
+void drawTrafficLightIndicator();  // Declare this function
+
+extern std::vector<Vehicle> vehicles;
+extern TrafficLight trafficLight;
 
 #endif

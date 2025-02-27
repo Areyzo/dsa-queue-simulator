@@ -1,6 +1,9 @@
 #include "traffic_simulation.hpp"
 #include <stdio.h>
 
+// Forward declaration for the drawTrafficLightIndicator function
+void drawTrafficLightIndicator();
+
 void simulateTraffic();
 
 int main() {
@@ -49,6 +52,12 @@ void simulateTraffic() {
                 DrawRectangleV({vehicle.rect.x, vehicle.rect.y}, {vehicle.rect.width, vehicle.rect.height}, vehicle.color);
             }
         }
+
+        // Update traffic light state
+        updateTrafficLight();
+
+        // Draw the traffic light indicator
+        drawTrafficLightIndicator();
 
         EndDrawing();
     }
