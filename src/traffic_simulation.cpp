@@ -4,7 +4,7 @@
 #include <istream>
 #include <algorithm>
 
-std::vector<Vehicle> vehicles;
+std::vector<Vehicle> vehicles; // This will act like a queue for vehicles
 
 TrafficLight trafficLights[4] = {
     {{250, 230, 50, 100}, false},  // Left
@@ -46,6 +46,8 @@ void createVehicle() {
     }
 
     newVehicle.color = getRandomColor();
+
+    // Add the new vehicle to the end of the vector (queue behavior)
     vehicles.push_back(newVehicle);
 }
 
@@ -57,7 +59,11 @@ void updateVehicles() {
     float horizontalThreshold = screenWidth * 0.4f;
     float verticalThreshold = screenHeight * 0.4f;
 
-    for (auto& vehicle : vehicles) {
+    // Process each vehicle in the vector as if it is a queue
+    size_t vehicleCount = vehicles.size();
+    for (size_t i = 0; i < vehicleCount; i++) {
+        Vehicle& vehicle = vehicles[i];
+
         if (vehicle.active) {
             bool shouldStop = false;
 
@@ -87,7 +93,7 @@ void updateVehicles() {
         }
     }
 
-    // Remove inactive vehicles
+    // Remove inactive vehicles from the front (queue behavior)
     vehicles.erase(
         std::remove_if(vehicles.begin(), vehicles.end(), [](const Vehicle& v) { return !v.active; }),
         vehicles.end()
