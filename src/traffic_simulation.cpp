@@ -22,28 +22,44 @@ void createVehicle() {
     newVehicle.rect = {0, 0, 18, 14};  // Width 18 and Height 14
     newVehicle.speed = 5;
 
-    int direction = GetRandomValue(0, 3); // 0 = left, 1 = right, 2 = top, 3 = bottom
-    newVehicle.direction = static_cast<Direction>(direction);
+    // Check if the corresponding traffic light is green
+    if (!trafficLights[LEFT].isGreen && !trafficLights[RIGHT].isGreen &&
+        !trafficLights[TOP].isGreen && !trafficLights[BOTTOM].isGreen) {
+        return;  // If no light is green, do not spawn vehicles
+    }
 
-    // Set the spawn position based on the direction (two lanes per side)
-    if (direction == LEFT) { // Left (two fixed y positions for lanes)
+    int direction = -1;
+
+    // Choose direction based on the green light (spawn vehicles only where the light is green)
+    if (trafficLights[LEFT].isGreen) {
+        direction = LEFT;
         newVehicle.rect.x = -newVehicle.rect.width;
-        newVehicle.rect.y = (GetRandomValue(0, 1) == 0) ? 350 : 380;  
-    } else if (direction == RIGHT) { // Right (two fixed y positions for lanes)
+        newVehicle.rect.y = (GetRandomValue(0, 1) == 0) ? 350 : 380;
+    } 
+    else if (trafficLights[RIGHT].isGreen) {
+        direction = RIGHT;
         newVehicle.rect.x = GetScreenWidth();
-        newVehicle.rect.y = (GetRandomValue(0, 1) == 0) ? 400 : 430;  
+        newVehicle.rect.y = (GetRandomValue(0, 1) == 0) ? 400 : 430;
         newVehicle.speed = -5;
-    } else if (direction == TOP) { // Top (two fixed x positions for lanes)
-        newVehicle.rect.x = (GetRandomValue(0, 1) == 0) ? 400 : 430;  
+    } 
+    else if (trafficLights[TOP].isGreen) {
+        direction = TOP;
+        newVehicle.rect.x = (GetRandomValue(0, 1) == 0) ? 400 : 430;
         newVehicle.rect.y = -newVehicle.rect.height;
-    } else if (direction == BOTTOM) { // Bottom (two fixed x positions for lanes)
-        newVehicle.rect.x = (GetRandomValue(0, 1) == 0) ? 350 : 380;  
+    } 
+    else if (trafficLights[BOTTOM].isGreen) {
+        direction = BOTTOM;
+        newVehicle.rect.x = (GetRandomValue(0, 1) == 0) ? 350 : 380;
         newVehicle.rect.y = GetScreenHeight();
         newVehicle.speed = -5;
     }
 
-    newVehicle.color = getRandomColor();
-    vehicles.push_back(newVehicle);
+    // If a valid direction is chosen, set the vehicle's direction and color
+    if (direction != -1) {
+        newVehicle.direction = static_cast<Direction>(direction);
+        newVehicle.color = getRandomColor();
+        vehicles.push_back(newVehicle);
+    }
 }
 
 // Function to update vehicles
