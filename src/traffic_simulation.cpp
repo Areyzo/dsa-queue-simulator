@@ -6,51 +6,73 @@
 
 std::vector<Vehicle> vehicles;
 
-TrafficLight trafficLight = {{250, 230, 50, 100}, false}; // Traffic light position moved to the left
+TrafficLight trafficLights[4] = {
+    {{250, 230, 50, 100}, false},  // Left
+    {{475, 480, 50, 100}, false},  // Right
+    {{475, 230, 50, 100}, false},  // Top
+    {{250, 480, 50, 100}, false}   // Bottom
+};
 
+int currentLight = 0; // Index to track which traffic light is green
+
+// Function to create a new vehicle
 void createVehicle() {
     Vehicle newVehicle;
     newVehicle.active = true;
-
-    // Set the new dimensions for the vehicle
     newVehicle.rect = {0, 0, 18, 14};  // Width 18 and Height 14
+    newVehicle.speed = 5;
 
-    newVehicle.speed = 5;  // Reduced speed
+    int direction = GetRandomValue(0, 3); // 0 = left, 1 = right, 2 = top, 3 = bottom
+    newVehicle.direction = static_cast<Direction>(direction);
 
-    // Start the vehicle off-screen to the left
-    newVehicle.rect.x = -newVehicle.rect.width;  // Position vehicle off-screen to the left
-
-    // Assign vehicles to two lines in the center of the screen, with a smaller gap
-    int lineChoice = GetRandomValue(0, 1); // 0 = top line, 1 = bottom line
-    if (lineChoice == 0) {
-        // Top line (centered horizontally, upper half of the screen, with reduced gap)
-        newVehicle.rect.y = 400 - 50;
-    } else {
-        // Bottom line (centered horizontally, lower half of the screen, with reduced gap)
-        newVehicle.rect.y = 400 - 22;
+    // Set the spawn position based on the direction (two lanes per side)
+    if (direction == LEFT) { // Left (two fixed y positions for lanes)
+        newVehicle.rect.x = -newVehicle.rect.width;
+        newVehicle.rect.y = (GetRandomValue(0, 1) == 0) ? 350 : 380;  
+    } else if (direction == RIGHT) { // Right (two fixed y positions for lanes)
+        newVehicle.rect.x = GetScreenWidth();
+        newVehicle.rect.y = (GetRandomValue(0, 1) == 0) ? 400 : 430;  
+        newVehicle.speed = -5;
+    } else if (direction == TOP) { // Top (two fixed x positions for lanes)
+        newVehicle.rect.x = (GetRandomValue(0, 1) == 0) ? 400 : 430;  
+        newVehicle.rect.y = -newVehicle.rect.height;
+    } else if (direction == BOTTOM) { // Bottom (two fixed x positions for lanes)
+        newVehicle.rect.x = (GetRandomValue(0, 1) == 0) ? 350 : 380;  
+        newVehicle.rect.y = GetScreenHeight();
+        newVehicle.speed = -5;
     }
 
-    // Assign a random color to the vehicle
     newVehicle.color = getRandomColor();
-
     vehicles.push_back(newVehicle);
 }
 
+// Function to update vehicles
 void updateVehicles() {
     for (auto& vehicle : vehicles) {
         if (vehicle.active) {
-            // Stop vehicles behind the midpoint if the light is red
-            if (!trafficLight.isGreen && vehicle.rect.x + vehicle.rect.width > GetScreenWidth() / 2) {
-                continue; // Do not move the vehicle
-            }
-            
-            // If the light is green, allow vehicle to move
-            if (trafficLight.isGreen) {
-                vehicle.rect.x += vehicle.speed;
+            bool shouldStop = false;
+
+            // Stop vehicles that are not in the direction of the current green light
+            if (vehicle.direction == LEFT && currentLight != 0) shouldStop = true; // Stop if not left light
+            if (vehicle.direction == RIGHT && currentLight != 1) shouldStop = true; // Stop if not right light
+            if (vehicle.direction == TOP && currentLight != 2) shouldStop = true; // Stop if not top light
+            if (vehicle.direction == BOTTOM && currentLight != 3) shouldStop = true; // Stop if not bottom light
+
+            // Only allow movement if the light is green and the vehicle is on the correct side
+            if (shouldStop && !trafficLights[currentLight].isGreen) {
+                continue; // Skip moving the vehicle if the light is not green
             }
 
-            // If the vehicle goes off-screen to the right, deactivate it
-            if (vehicle.rect.x > GetScreenWidth()) {
+            // Move the vehicle based on its direction
+            if (vehicle.direction == LEFT || vehicle.direction == RIGHT) {
+                vehicle.rect.x += vehicle.speed;
+            } else {
+                vehicle.rect.y += vehicle.speed;
+            }
+
+            // Deactivate the vehicle if it goes off-screen
+            if (vehicle.rect.x > GetScreenWidth() || vehicle.rect.x < -vehicle.rect.width ||
+                vehicle.rect.y > GetScreenHeight() || vehicle.rect.y < -vehicle.rect.height) {
                 vehicle.active = false;
             }
         }
@@ -63,43 +85,36 @@ void updateVehicles() {
     );
 }
 
+// Function to get a random color for the vehicles
 Color getRandomColor() {
-    int colorChoice = GetRandomValue(0, 2);  // 0 = Red, 1 = Blue, 2 = Yellow
+    int colorChoice = GetRandomValue(0, 2);
     switch (colorChoice) {
         case 0: return RED;
         case 1: return BLUE;
         case 2: return YELLOW;
-        default: return WHITE; // Default fallback color
+        default: return WHITE;
     }
 }
 
+// Function to draw traffic light indicators
 void drawTrafficLightIndicator() {
-    // Draw the traffic light indicator
-    DrawRectangle(trafficLight.rect.x, trafficLight.rect.y, trafficLight.rect.width, trafficLight.rect.height, DARKGRAY);
-
-    // Draw the red light
-    DrawCircle(trafficLight.rect.x + trafficLight.rect.width / 2, trafficLight.rect.y + 20, 15, trafficLight.isGreen ? DARKGRAY : RED);
-
-    // Draw the green light
-    DrawCircle(trafficLight.rect.x + trafficLight.rect.width / 2, trafficLight.rect.y + 50, 15, trafficLight.isGreen ? GREEN : DARKGRAY);
-
-    // Draw labels for lanes
-    DrawText("Priority Lane", 100, 350, 20, RED);  // Priority lane label
-    DrawText("Normal Lane", 100, 380, 20, BLUE);   // Normal lane label
+    for (int i = 0; i < 4; i++) {
+        DrawRectangle(trafficLights[i].rect.x, trafficLights[i].rect.y, trafficLights[i].rect.width, trafficLights[i].rect.height, DARKGRAY);
+        DrawCircle(trafficLights[i].rect.x + trafficLights[i].rect.width / 2, trafficLights[i].rect.y + 20, 15, trafficLights[i].isGreen ? DARKGRAY : RED);
+        DrawCircle(trafficLights[i].rect.x + trafficLights[i].rect.width / 2, trafficLights[i].rect.y + 50, 15, trafficLights[i].isGreen ? GREEN : DARKGRAY);
+    }
 }
 
+// Function to update traffic light state
 void updateTrafficLight() {
     static int frameCounter = 0;
     frameCounter++;
 
-    // The traffic light turns green after 10 vehicles in the priority lane
-    int priorityLaneVehicleCount = std::count_if(vehicles.begin(), vehicles.end(), [](const Vehicle& v) {
-        return v.rect.y == 400 - 50;  // Top lane is considered the priority lane
-    });
-
-    // Toggle light every 180 frames (3 seconds at 60 FPS) or if there are 10 or more vehicles in the priority lane
-    if (priorityLaneVehicleCount >= 10 || frameCounter % 180 == 0) {
-        trafficLight.isGreen = !trafficLight.isGreen;
-        frameCounter = 0;  // Reset frame counter
+    // Switch lights every 180 frames (for example)
+    if (frameCounter % 180 == 0) {
+        trafficLights[currentLight].isGreen = false;
+        currentLight = (currentLight + 1) % 4; // Rotate through traffic lights
+        trafficLights[currentLight].isGreen = true;
+        frameCounter = 0;
     }
 }
