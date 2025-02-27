@@ -5,15 +5,16 @@
 #include <algorithm>
 
 std::vector<Vehicle> vehicles;
-TrafficLight trafficLight = {false, 0.0f, 3.0f};  // Initializing traffic light to red
+
+TrafficLight trafficLight = {{250, 230, 50, 100}, false}; // Traffic light position moved to the left
 
 void createVehicle() {
     Vehicle newVehicle;
     newVehicle.active = true;
-    
+
     // Set the new dimensions for the vehicle
     newVehicle.rect = {0, 0, 18, 14};  // Width 18 and Height 14
-    
+
     newVehicle.speed = 5;  // Reduced speed
 
     // Start the vehicle off-screen to the left
@@ -26,28 +27,31 @@ void createVehicle() {
         newVehicle.rect.y = 400 - 50;
     } else {
         // Bottom line (centered horizontally, lower half of the screen, with reduced gap)
-        newVehicle.rect.y = 400 -22;
+        newVehicle.rect.y = 400 - 22;
     }
 
     // Assign a random color to the vehicle
     newVehicle.color = getRandomColor();
-    
+
     vehicles.push_back(newVehicle);
 }
 
 void updateVehicles() {
     for (auto& vehicle : vehicles) {
         if (vehicle.active) {
-            // If the light is red, stop vehicles in the middle
-            if (!trafficLight.isGreen && vehicle.rect.x >= 350 && vehicle.rect.x <= 450) {
-                vehicle.speed = 0;  // Stop vehicle
-            } else if (trafficLight.isGreen && vehicle.rect.x < GetScreenWidth()) {
-                vehicle.speed = 5;  // Move vehicle when green
+            // Stop vehicles behind the midpoint if the light is red
+            if (!trafficLight.isGreen && vehicle.rect.x + vehicle.rect.width > GetScreenWidth() / 2) {
+                continue; // Do not move the vehicle
+            }
+            
+            // If the light is green, allow vehicle to move
+            if (trafficLight.isGreen) {
+                vehicle.rect.x += vehicle.speed;
             }
 
-            vehicle.rect.x += vehicle.speed;
+            // If the vehicle goes off-screen to the right, deactivate it
             if (vehicle.rect.x > GetScreenWidth()) {
-                vehicle.active = false; // Deactivate if off-screen to the right
+                vehicle.active = false;
             }
         }
     }
@@ -69,28 +73,33 @@ Color getRandomColor() {
     }
 }
 
-// Function to update the state of the traffic light
-void updateTrafficLight() {
-    trafficLight.timer += GetFrameTime();
-    if (trafficLight.timer >= trafficLight.switchTime) {
-        trafficLight.isGreen = !trafficLight.isGreen;  // Toggle traffic light state
-        trafficLight.timer = 0.0f;
-    }
+void drawTrafficLightIndicator() {
+    // Draw the traffic light indicator
+    DrawRectangle(trafficLight.rect.x, trafficLight.rect.y, trafficLight.rect.width, trafficLight.rect.height, DARKGRAY);
+
+    // Draw the red light
+    DrawCircle(trafficLight.rect.x + trafficLight.rect.width / 2, trafficLight.rect.y + 20, 15, trafficLight.isGreen ? DARKGRAY : RED);
+
+    // Draw the green light
+    DrawCircle(trafficLight.rect.x + trafficLight.rect.width / 2, trafficLight.rect.y + 50, 15, trafficLight.isGreen ? GREEN : DARKGRAY);
+
+    // Draw labels for lanes
+    DrawText("Priority Lane", 100, 350, 20, RED);  // Priority lane label
+    DrawText("Normal Lane", 100, 380, 20, BLUE);   // Normal lane label
 }
 
-// Function to draw the traffic light indicator on the screen
-void drawTrafficLightIndicator() {
-    int x = 700; // X position of the traffic light
-    int y = 350; // Y position of the traffic light
+void updateTrafficLight() {
+    static int frameCounter = 0;
+    frameCounter++;
 
-    // Draw a smaller rectangle for the traffic light
-    DrawRectangle(x, y, 40, 100, DARKGRAY);  // Adjusted size for the traffic light
+    // The traffic light turns green after 10 vehicles in the priority lane
+    int priorityLaneVehicleCount = std::count_if(vehicles.begin(), vehicles.end(), [](const Vehicle& v) {
+        return v.rect.y == 400 - 50;  // Top lane is considered the priority lane
+    });
 
-    // Draw the green or red light (no yellow now)
-    Color lightColor = trafficLight.isGreen ? GREEN : RED;
-    DrawRectangle(x + 5, y + 10, 30, 30, lightColor);  // Top light (Green/Red)
-
-    // Optional: Label indicating the current state
-    const char* stateText = trafficLight.isGreen ? "Green" : "Red";
-    DrawText(stateText, x + 5, y + 75, 20, WHITE);  // Smaller text
+    // Toggle light every 180 frames (3 seconds at 60 FPS) or if there are 10 or more vehicles in the priority lane
+    if (priorityLaneVehicleCount >= 10 || frameCounter % 180 == 0) {
+        trafficLight.isGreen = !trafficLight.isGreen;
+        frameCounter = 0;  // Reset frame counter
+    }
 }

@@ -1,32 +1,35 @@
 #ifndef TRAFFIC_SIMULATION_HPP
 #define TRAFFIC_SIMULATION_HPP
 
-#include <raylib.h>
 #include <vector>
+#include <raylib.h>
 
-// Vehicle structure definition
+// Structure to define a vehicle
 struct Vehicle {
     Rectangle rect;
     Color color;
     bool active;
     float speed;
+    int direction;  // 0: Straight, 1: Left, 2: Right
+    bool isPriorityLane;  // Flag to indicate if the vehicle is in the priority lane
 };
 
-// Traffic light structure definition
+// Structure for traffic light
 struct TrafficLight {
-    bool isGreen;      // true = green, false = red
-    float timer;       // Timer for switching
-    float switchTime;  // Time interval for switching light
+    Rectangle rect;
+    bool isGreen;  // true: Green, false: Red
 };
 
-// Function declarations
+// Declare the functions that are used in traffic simulation
 void createVehicle();
 void updateVehicles();
 Color getRandomColor();
 void updateTrafficLight();
-void drawTrafficLightIndicator();  // Declare this function
+void drawTrafficLightIndicator();
 
+// Declare the external vector of vehicles and the priority lane counter
 extern std::vector<Vehicle> vehicles;
 extern TrafficLight trafficLight;
+extern int priorityLaneVehicleCount;  // Counter for vehicles in the priority lane
 
 #endif
