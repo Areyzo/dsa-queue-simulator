@@ -6,16 +6,7 @@ int main(void)
     // Initialize the window with a temporary size
     InitWindow(800, 800, "dsa-queue-simulator");
 
-    if (FileExists("Images/astroid.png")) {
-        printf("File found!\n");
-    } else {
-        printf("File not found!\n");
-        return 1;  // Exit if the file is not found
-    }
-    
-
     Texture2D background = LoadTexture("Images/img.png");
-
     if (background.id == 0) {
         printf("Failed to load texture img.jpg\n");
         return 1;  // Exit if the texture fails
@@ -25,7 +16,7 @@ int main(void)
     }
     
     // Switch to fullscreen
-    //ToggleFullscreen();
+    ToggleFullscreen();
 
     while (!WindowShouldClose()) // Main loop
     {
