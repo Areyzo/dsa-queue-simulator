@@ -9,18 +9,29 @@ The traffic simulation system manages normal and high-priority vehicle dispatch 
 
 Key Features
 🚗 Queue-based Traffic Management: Vehicles are managed in queues for each lane and processed based on traffic light conditions and lane priority.
+
 🚨 Priority Lane Handling: Vehicles in priority lanes move faster than those in normal lanes to simulate emergency vehicles.
+
 🖥️ Real-time Visualization: The simulation uses Raylib for graphical representation.
+
 ⚙️ Dynamic Traffic Light Control: Traffic lights rotate every 100 frames, controlling vehicle flow.
+
 🏗️ System Architecture
+
 Traffic Management Rules
 Normal Condition: Traffic lights switch based on a round-robin pattern every 100 frames, ensuring fair service to all lanes.
+
 Priority Condition: Vehicles in priority lanes move faster than those in normal lanes to simulate urgent traffic (e.g., emergency vehicles).
+
 Vehicle Stopping Condition: Vehicles stop when their respective light is red and they haven't passed the 40% threshold on their path.
+
 Core Components
 Vehicle Generator: Dynamically creates vehicle data and adds it to the vehicle queue.
+
 Traffic Simulator: Manages vehicle movement, traffic light changes, and lane conditions based on vehicle positions.
+
 Visualization: Real-time rendering of vehicles, traffic lights, and lanes on the screen.
+
 📊 Data Structures
 Structure	Implementation	Purpose
 std::vector<Vehicle>	Vector-based (acting as a queue)	Storing vehicles in a queue-like manner for each lane
@@ -37,11 +48,13 @@ Traffic Light Update: Every 100 frames, the traffic light changes in a round-rob
 Vehicle Movement: Vehicles move based on their direction (left, right, top, or bottom). Priority vehicles move faster.
 Vehicle Processing: Vehicles in the queue are processed in FIFO order. If a vehicle's corresponding light is red and it hasn't crossed the 40% threshold of its path, it stops.
 Visualization: The screen is updated every frame to render the vehicles, traffic lights, and lanes.
+
 📊 Time Complexity Analysis
 Queue Operations (enqueue, dequeue): O(1)
 Traffic Light Update: O(n), where n is the number of lanes
 Vehicle Movement: O(n), where n is the number of vehicles
 Overall Time Complexity: O(n), where n is the number of vehicles processed in the simulation.
+
 💻 Implementation Details
 Key Functions
 Queue Operations:
@@ -58,6 +71,7 @@ void drawBackground();
 Vehicle Generation:
 void createVehicle();
 void updateVehicles(std::vector<Vehicle>& vehicles);
+
 🚀 Installation and Setup
 Prerequisites
 C++ compiler (GCC or MinGW)
@@ -93,6 +107,8 @@ bash
 Copy
 Edit
 ./bin/main
+
+
 📄 License
 This project is licensed under the MIT License - see the LICENSE file for details.
 
