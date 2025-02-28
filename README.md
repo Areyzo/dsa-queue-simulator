@@ -95,8 +95,8 @@ Building the Project
 bash
 Copy
 Edit
-git clone https://github.com/YOUR_USERNAME/four-way-junction-traffic-simulation.git
-cd four-way-junction-traffic-simulation
+git clone (https://github.com/Areyzo/dsa-queue-simulator.git)
+cd dsa-queue-simulator
 2. Compile the Code
 bash
 Copy
